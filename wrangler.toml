@@ -1,0 +1,19 @@
+name = "olive-lane-photography"
+main = "worker/index.js"
+compatibility_date = "2026-09-25"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "olive-lane-bookings"
+database_id = "c9403ef3-5ec2-4220-af85-8c687777c738"
+migrations_dir = "worker/migrations"
+
+[[ratelimits]]
+name = "ADMIN_LOGIN_LIMITER"
+namespace_id = "4621907"
+simple = { limit = 5, period = 60 }
