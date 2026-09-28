@@ -2,7 +2,32 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type Keyboard
 import './App.css'
 import { heroImage, photographs, type PortfolioPhoto } from './portfolio-data'
 
-const categories = ['All', 'Portraits', 'Events', 'Commercial', 'Street', 'Studio', 'Outdoor', 'Travel']
+const galleryGroups = {
+  Weddings: ['Weddings'],
+  People: ['Portraits', 'Studio', 'Outdoor'],
+  Brands: ['Commercial'],
+  Places: ['Travel'],
+  Street: ['Street'],
+} as const
+type GalleryGroup = 'All' | keyof typeof galleryGroups
+const categories: GalleryGroup[] = ['All', 'Weddings', 'People', 'Brands', 'Places', 'Street']
+const categoryLabel = (value: PortfolioPhoto['category']) => value === 'Commercial' ? 'Brands' : value === 'Travel' ? 'Places' : ['Portraits', 'Studio', 'Outdoor'].includes(value) ? 'People' : value
+const uniquePhotos = (items: PortfolioPhoto[]) => [...new Map(items.map((photo) => [photo.image, photo])).values()]
+const interleave = (groups: PortfolioPhoto[][]) => {
+  const result: PortfolioPhoto[] = []
+  const longest = Math.max(0, ...groups.map((group) => group.length))
+  for (let index = 0; index < longest; index += 1) {
+    groups.forEach((group) => { if (group[index]) result.push(group[index]) })
+  }
+  return result
+}
+const organizeStories = (items: PortfolioPhoto[], group: GalleryGroup) => {
+  const unique = uniquePhotos(items)
+  if (group === 'All') return interleave(Object.values(galleryGroups).map((members) => unique.filter((photo) => members.includes(photo.category as never))))
+  const members = galleryGroups[group]
+  const matching = unique.filter((photo) => members.includes(photo.category as never))
+  return group === 'People' ? interleave(members.map((member) => matching.filter((photo) => photo.category === member))) : matching
+}
 const serviceFromCategory = (value: string) => value === 'Weddings' ? 'Wedding' : ['Portraits', 'Studio', 'Outdoor'].includes(value) ? 'Portrait session' : value === 'Commercial' ? 'Commercial photography' : value === 'Street' ? 'Street photography' : value
 const storyType = (value: string) => value === 'Weddings' ? 'wedding' : ['Portraits', 'Studio', 'Outdoor'].includes(value) ? 'portrait' : value.toLowerCase()
 const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -23,9 +48,9 @@ function App() {
       return 'default'
     }
   })
-  const [activeCategory, setActiveCategory] = useState('All')
+  const [activeCategory, setActiveCategory] = useState<GalleryGroup>('All')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [stories, setStories] = useState(photographs)
+  const [stories, setStories] = useState(() => organizeStories(photographs, 'All'))
   const [visibleCount, setVisibleCount] = useState(6)
   const [packages, setPackages] = useState(defaultPackages)
   const [adminMode, setAdminMode] = useState(window.location.hash === '#admin')
@@ -49,12 +74,11 @@ function App() {
   }, [appearance])
 
   useEffect(() => {
-    const query = activeCategory === 'All' ? '' : `?category=${encodeURIComponent(activeCategory)}`
     setVisibleCount(6)
-    fetch(`${API_URL}/portfolio${query}`)
+    fetch(`${API_URL}/portfolio`)
       .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((items: typeof photographs) => setStories(items))
-      .catch(() => setStories(activeCategory === 'All' ? photographs : photographs.filter((photo) => activeCategory === 'Events' ? photo.category === 'Weddings' : photo.category === activeCategory)))
+      .then((items: typeof photographs) => setStories(organizeStories(items, activeCategory)))
+      .catch(() => setStories(organizeStories(photographs, activeCategory)))
   }, [activeCategory])
 
   useEffect(() => {
@@ -168,8 +192,8 @@ function App() {
       <section className="portfolio section-wrap" id="portfolio">
         <div className="section-heading"><div><span className="eyebrow">SELECTED WORK</span><h2>Stories worth <em>keeping.</em></h2></div><span className="image-count">A CURATED GLIMPSE INTO THE OLIVE LANE STYLE</span></div>
         <div className="filters" aria-label="Filter portfolio">{categories.map((category) => <button key={category} type="button" className={activeCategory === category ? 'filter active' : 'filter'} aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)}>{category}</button>)}<span className="filter-count" aria-live="polite">{stories.length} {stories.length === 1 ? 'image study' : 'image studies'}</span></div>
-        <p className="portfolio-note">A small collection of editorial image studies selected to introduce the studio’s warm, feeling-first approach. These are illustrative stock photographs while the Olive Lane client archive is being prepared.</p>
-        <div className="gallery">{stories.slice(0, visibleCount).map((photo, i) => <article className={`photo-card card-${i + 1}`} key={photo.id}><a className="photo-image" href={`/stories/${encodeURIComponent(photo.id)}`} aria-label={`View ${photo.category.toLowerCase()} image study: ${photo.title}`}><img src={`https://images.unsplash.com/${photo.image}?auto=format&fit=crop&w=980&q=78`} srcSet={[520, 980, 1400].map((width) => `https://images.unsplash.com/${photo.image}?auto=format&fit=crop&w=${width}&q=78 ${width}w`).join(', ')} sizes="(max-width: 700px) 86vw, 40vw" alt={`Illustrative ${storyType(photo.category)} study: ${photo.title}`} loading="lazy" decoding="async"/><span className="photo-arrow" aria-hidden="true">↗</span></a><div className="photo-caption"><h3><a href={`/stories/${encodeURIComponent(photo.id)}`}>{photo.title}</a></h3><span className="photo-category">{photo.category === 'Weddings' ? 'Events' : photo.category}</span></div></article>)}</div>
+        <p className="portfolio-note">A balanced edit across celebrations, people, brands, places and street work. Every visible frame is unique, and the groups make it easier to find the kind of photography you have in mind.</p>
+        <div className="gallery">{stories.slice(0, visibleCount).map((photo, i) => <article className={`photo-card card-${i + 1}`} key={photo.id}><a className="photo-image" href={`/stories/${encodeURIComponent(photo.id)}`} aria-label={`View ${photo.category.toLowerCase()} image study: ${photo.title}`}><img src={`https://images.unsplash.com/${photo.image}?auto=format&fit=crop&w=980&q=78`} srcSet={[520, 980, 1400].map((width) => `https://images.unsplash.com/${photo.image}?auto=format&fit=crop&w=${width}&q=78 ${width}w`).join(', ')} sizes="(max-width: 700px) 86vw, 40vw" alt={`Illustrative ${storyType(photo.category)} study: ${photo.title}`} loading="lazy" decoding="async"/><span className="photo-arrow" aria-hidden="true">↗</span></a><div className="photo-caption"><h3><a href={`/stories/${encodeURIComponent(photo.id)}`}>{photo.title}</a></h3><span className="photo-category">{categoryLabel(photo.category)}</span></div></article>)}</div>
         {stories.length > visibleCount && <button className="gallery-more" type="button" onClick={() => setVisibleCount((count) => count + 6)}>View more stories <span>({stories.length - visibleCount} remaining)</span></button>}
       </section>
 
