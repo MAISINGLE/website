@@ -225,8 +225,16 @@ function App() {
       <section className="hero" id="home">
         <img className="hero-image" src={`https://images.unsplash.com/${heroImage}?auto=format&fit=crop&w=1500&q=78`} srcSet={[900, 1500, 2100].map((width) => `https://images.unsplash.com/${heroImage}?auto=format&fit=crop&w=${width}&q=78 ${width}w`).join(', ')} sizes="100vw" fetchPriority="high" alt="Illustrative wedding celebration in a sunlit garden" />
         <div className="hero-shade" />
-        <div className="hero-copy"><span className="eyebrow light">PHOTOGRAPHS WITH A FEELING</span><h1>For the days<br />you’ll <em>always</em> remember.</h1><div className="hero-actions"><a className="hero-primary" href="#contact">Enquire about your session <span>↗</span></a><a className="hero-link" href="#portfolio">Explore the stories <span>↓</span></a></div></div>
-        <span className="hero-note">BASED IN MELBOURNE · AVAILABLE EVERYWHERE</span>
+        <span className="hero-photo-note">ILLUSTRATIVE IMAGE STUDY · NOT CLIENT WORK</span>
+        <div className="hero-copy">
+          <span className="eyebrow">MELBOURNE · WEDDINGS · PORTRAITS · TRAVEL</span>
+          <h1>Photographs for<br />the moments that<br /><em>feel like you.</em></h1>
+          <p className="hero-description">Warm, thoughtful photography for celebrations, people and places—made with care in Melbourne and beyond.</p>
+          <p className="hero-wink">No stiff posing. No “what do I do with my hands?” quiz.</p>
+          <span className="hero-inline-note">Featured image is illustrative, not client work.</span>
+          <div className="hero-actions"><a className="hero-primary" href="#contact">Tell us what you’re planning <span>↗</span></a><a className="hero-link" href="#portfolio">Explore the stories <span>↓</span></a></div>
+        </div>
+        <span className="hero-note">A SMALL STUDIO · A PERSONAL TOUCH</span>
       </section>
 
       <aside className="studio-promises" aria-label="Studio highlights"><span>Melbourne based</span><span>Available across Australia</span><span>Planning guidance included</span><span>Replies within two business days</span></aside>
