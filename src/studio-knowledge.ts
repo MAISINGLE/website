@@ -33,10 +33,10 @@ export type StudioPackage = {
 export const studioProfile: StudioProfile = {
   name: 'Olive Lane Photography',
   photographer: 'Nam Vu',
-  base: 'Melbourne, Australia',
+  base: 'Melbourne and Sydney, Australia',
   contactEmail: 'hello@olivelane.photo',
   responseWindow: 'within two business days',
-  serviceArea: 'Melbourne, across Australia, and for selected destination work overseas',
+  serviceArea: 'Australia, with selected destination work overseas',
 }
 
 export const studioPackages: StudioPackage[] = [
@@ -44,25 +44,25 @@ export const studioPackages: StudioPackage[] = [
     id: 'intimate', name: 'The Intimate', category: 'Weddings', hours: '6 hours', deliverables: '350+ edited images', priceFrom: 2800, currency: 'AUD',
     description: 'For heartfelt celebrations, with room for the moments that matter most.',
     inclusions: ['Six hours of wedding photography', '350+ edited images', 'Planning call and timeline guidance', 'Private online gallery'],
-    locationIdeas: ['Royal Botanic Gardens', 'Fitzroy Gardens', 'Abbotsford Convent', 'Carlton Gardens'],
+    locationIdeas: ['Royal Botanic Gardens Melbourne', 'Fitzroy Gardens', 'Abbotsford Convent', 'Carlton Gardens', 'Royal Botanic Garden Sydney', 'The Rocks', 'Centennial Park Sydney', 'Observatory Hill'],
   },
   {
     id: 'full-day', name: 'The Full Story', category: 'Weddings', hours: '10 hours', deliverables: '650+ edited images', priceFrom: 4200, currency: 'AUD',
     description: 'A fuller wedding story, from getting ready through to the last dance.',
     inclusions: ['Ten hours of wedding photography', '650+ edited images', 'Planning call and timeline guidance', 'Private online gallery'],
-    locationIdeas: ['Melbourne Town Hall', 'Montsalvat', 'Rippon Lea Estate', 'Yarra Valley'],
+    locationIdeas: ['Melbourne Town Hall', 'Montsalvat', 'Rippon Lea Estate', 'Yarra Valley', 'Sydney Harbour', 'The Rocks', 'Centennial Park Sydney', 'Royal Botanic Garden Sydney'],
   },
   {
     id: 'portrait', name: 'The Portrait Session', category: 'Portraits', hours: '90 minutes', deliverables: '60+ edited images', priceFrom: 650, currency: 'AUD',
     description: 'A relaxed portrait session for couples, families, or an individual.',
     inclusions: ['90-minute portrait session', '60+ edited images', 'Studio, outdoor, or at-home setting options', 'Private online gallery'],
-    locationIdeas: ['Studio session', 'Royal Botanic Gardens', 'Brighton Beach', 'At home'],
+    locationIdeas: ['Melbourne studio session', 'Royal Botanic Gardens Melbourne', 'Brighton Beach', 'Sydney studio session', 'Royal Botanic Garden Sydney', 'Bondi Beach', 'At home'],
   },
   {
     id: 'destination', name: 'The Faraway', category: 'Travel', hours: 'Custom', deliverables: 'Curated gallery', priceFrom: 1800, currency: 'AUD',
     description: 'A custom story for destination celebrations and travel photography.',
     inclusions: ['Custom coverage planned around your trip', 'Curated edited gallery', 'Planning call and location guidance', 'Private online gallery'],
-    locationIdeas: ['Great Ocean Road', 'Grampians', 'Mornington Peninsula', 'Phillip Island'],
+    locationIdeas: ['Great Ocean Road', 'Grampians', 'Mornington Peninsula', 'Phillip Island', 'Sydney Harbour', 'Blue Mountains', 'Bondi Beach', 'Royal National Park'],
   },
 ]
 
@@ -144,12 +144,12 @@ export const studioFaqs: StudioFaq[] = [
   },
   {
     id: 'travel-area', question: 'Where are you based, and do you travel?',
-    answer: `Olive Lane is based in ${studioProfile.base} and works across ${studioProfile.serviceArea}. Share your location in the inquiry so travel needs can be included in the proposal.`,
+    answer: `Olive Lane is based in ${studioProfile.base} and photographs across ${studioProfile.serviceArea}. Share your location in the inquiry so travel needs can be included in the proposal.`,
     keywords: ['based', 'melbourne', 'where', 'travel', 'australia', 'overseas', 'destination'], sourceLabel: 'Travel and coverage', href: '#packages',
   },
   {
     id: 'location-ideas', question: 'Which places can I choose for a session?',
-    answer: 'The collections page includes location ideas such as Melbourne gardens and heritage venues, Brighton Beach, the Great Ocean Road, the Grampians, and the Yarra Valley. They are suggestions rather than included venue bookings; access, permits, travel and any fees are confirmed in your proposal. You can also suggest a place of your own.',
+    answer: 'The collections page includes location ideas in Melbourne, Sydney, and nearby travel regions—for example, Melbourne gardens and heritage venues, the Royal Botanic Garden Sydney, The Rocks, Centennial Park, Brighton Beach, the Great Ocean Road, the Grampians, and the Blue Mountains. They are suggestions rather than included venue bookings; access, permits, travel and any fees are confirmed in your proposal. You can also suggest a place of your own.',
     keywords: ['place', 'places', 'location', 'locations', 'venue', 'park', 'garden', 'beach', 'included'], sourceLabel: 'Collections and location ideas', href: '#packages',
   },
   {

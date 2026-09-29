@@ -7,6 +7,8 @@ test('public studio knowledge API returns approved business facts and FAQs only'
   assert.equal(response.status, 200)
   const data = await response.json()
   assert.equal(data.profile.contactEmail, 'hello@olivelane.photo')
+  assert.equal(data.profile.base, 'Melbourne and Sydney, Australia')
+  assert.match(data.profile.serviceArea, /Australia/)
   assert.ok(data.faqs.some((faq) => faq.id === 'payment-methods'))
   assert.ok(data.faqs.some((faq) => faq.id === 'inquiry-privacy'))
   assert.ok(data.faqs.some((faq) => faq.id === 'photographer-background'))
@@ -15,6 +17,16 @@ test('public studio knowledge API returns approved business facts and FAQs only'
   assert.equal(JSON.stringify(data).includes('RESEND_API_KEY'), false)
   assert.equal(JSON.stringify(data).includes('admin_notes'), false)
   assert.equal(JSON.stringify(data).includes('keywords'), false)
+})
+
+test('public package endpoint includes Sydney location ideas for wedding and portrait inquiries', async () => {
+  const response = await worker.fetch(new Request('https://olive-lane.test/api/packages'), {})
+  assert.equal(response.status, 200)
+  const packages = await response.json()
+  const weddingPackages = packages.filter((item) => item.category === 'Weddings')
+  const portraitPackage = packages.find((item) => item.id === 'portrait')
+  assert.ok(weddingPackages.every((item) => item.locationIdeas.some((place) => place.includes('Sydney'))))
+  assert.ok(portraitPackage.locationIdeas.some((place) => place.includes('Sydney')))
 })
 
 test('Gemini receives only relevant curated public facts and chat returns source links', async () => {

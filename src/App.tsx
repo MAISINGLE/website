@@ -34,11 +34,11 @@ const storyType = (value: string) => value === 'Weddings' ? 'wedding' : ['Portra
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 const defaultPackages = studioPackages
 const placeChoices: Record<string, string[]> = {
-  Wedding: ['Royal Botanic Gardens', 'Fitzroy Gardens', 'Abbotsford Convent', 'Carlton Gardens', 'Melbourne Town Hall', 'Montsalvat', 'Rippon Lea Estate', 'Yarra Valley', 'Another venue'],
-  'Portrait session': ['Studio session', 'Royal Botanic Gardens', 'Brighton Beach', 'At home', 'Somewhere meaningful to me', 'Another place'],
-  Travel: ['Great Ocean Road', 'Grampians', 'Mornington Peninsula', 'Phillip Island', 'Somewhere else'],
-  'Commercial photography': ['Studio product setup', 'My workplace or brand space', 'Retail or lifestyle location', 'Somewhere else'],
-  'Street photography': ['Melbourne CBD', 'Laneways', 'Fitzroy or Collingwood', 'A custom photo walk'],
+  Wedding: ['Royal Botanic Gardens Melbourne', 'Fitzroy Gardens', 'Abbotsford Convent', 'Carlton Gardens', 'Melbourne Town Hall', 'Montsalvat', 'Rippon Lea Estate', 'Yarra Valley', 'Royal Botanic Garden Sydney', 'The Rocks', 'Centennial Park Sydney', 'Observatory Hill', 'Sydney Harbour', 'Another venue'],
+  'Portrait session': ['Melbourne studio session', 'Royal Botanic Gardens Melbourne', 'Brighton Beach', 'Royal Botanic Garden Sydney', 'Bondi Beach', 'Sydney Harbour', 'Centennial Park Sydney', 'The Rocks', 'At home', 'Somewhere meaningful to me', 'Another place'],
+  Travel: ['Great Ocean Road', 'Grampians', 'Mornington Peninsula', 'Phillip Island', 'Sydney Harbour', 'Blue Mountains', 'Bondi Beach', 'Royal National Park', 'Somewhere else'],
+  'Commercial photography': ['Melbourne studio product setup', 'Sydney studio product setup', 'My workplace or brand space', 'Retail or lifestyle location', 'Somewhere else'],
+  'Street photography': ['Melbourne CBD', 'Laneways', 'Fitzroy or Collingwood', 'Sydney CBD', 'Circular Quay', 'The Rocks', 'Barangaroo', 'Newtown or Surry Hills', 'A custom photo walk'],
 }
 const focusChoices: Record<string, string[]> = {
   Wedding: ['Getting ready', 'Ceremony', 'Couple portraits', 'Family and wedding party', 'Reception and speeches', 'Details and atmosphere'],
@@ -109,8 +109,8 @@ function App() {
 
   useEffect(() => {
     const story = stories.find((item) => item.id === storyId)
-    const title = story ? `${story.title} | Olive Lane Photography` : 'Olive Lane Photography | Melbourne Wedding, Portrait & Travel Photographer'
-    const description = story ? `Explore an editorial ${story.category.toLowerCase()} image study from Olive Lane Photography.` : 'Melbourne photographer for weddings, portraits and travel stories. Explore image studies, collections and booking details.'
+    const title = story ? `${story.title} | Olive Lane Photography` : 'Olive Lane Photography | Melbourne & Sydney Wedding, Portrait & Travel Photographer'
+    const description = story ? `Explore an editorial ${story.category.toLowerCase()} image study from Olive Lane Photography.` : 'Melbourne and Sydney photographer for weddings, portraits and travel stories. Explore image studies, collections and booking details.'
     document.title = title
     document.querySelector('meta[name="description"]')?.setAttribute('content', description)
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
@@ -227,9 +227,9 @@ function App() {
         <div className="hero-shade" />
         <span className="hero-photo-note">ILLUSTRATIVE IMAGE STUDY · NOT CLIENT WORK</span>
         <div className="hero-copy">
-          <span className="eyebrow">MELBOURNE · WEDDINGS · PORTRAITS · TRAVEL</span>
+          <span className="eyebrow">MELBOURNE & SYDNEY · WEDDINGS · PORTRAITS · TRAVEL</span>
           <h1>Photographs for<br />the moments that<br /><em>feel like you.</em></h1>
-          <p className="hero-description">Warm, thoughtful photography for celebrations, people and places—made with care in Melbourne and beyond.</p>
+          <p className="hero-description">Warm, thoughtful photography for celebrations, people and places—made with care in Melbourne, Sydney and beyond.</p>
           <p className="hero-wink">No stiff posing. No “what do I do with my hands?” quiz.</p>
           <span className="hero-inline-note">Featured image is illustrative, not client work.</span>
           <div className="hero-actions"><a className="hero-primary" href="#contact">Tell us what you’re planning <span>↗</span></a><a className="hero-link" href="#portfolio">Explore the stories <span>↓</span></a></div>
@@ -237,7 +237,7 @@ function App() {
         <span className="hero-note">A SMALL STUDIO · A PERSONAL TOUCH</span>
       </section>
 
-      <aside className="studio-promises" aria-label="Studio highlights"><span>Melbourne based</span><span>Available across Australia</span><span>Planning guidance included</span><span>Aiming to reply within two business days</span></aside>
+      <aside className="studio-promises" aria-label="Studio highlights"><span>Melbourne & Sydney studios</span><span>Available across Australia</span><span>Planning guidance included</span><span>Aiming to reply within two business days</span></aside>
 
       <section className="portfolio section-wrap" id="portfolio">
         <div className="section-heading"><div><span className="eyebrow">SELECTED WORK</span><h2>Stories worth <em>keeping.</em></h2></div><span className="image-count">A CURATED GLIMPSE INTO THE OLIVE LANE STYLE</span></div>
@@ -248,8 +248,8 @@ function App() {
       </section>
 
       <section className="team-profile section-wrap" id="about">
-        <div><span className="eyebrow">MEET YOUR PHOTOGRAPHER</span><h2>A small studio,<br /><em>a personal touch.</em></h2><p>Nam leads every inquiry and session, from the first conversation through to your finished gallery. You’ll know who you’re speaking with and who will be behind the camera.</p><dl className="studio-facts"><div><dt>Based</dt><dd>Melbourne</dd></div><div><dt>Available</dt><dd>Australia & selected overseas destinations</dd></div><div><dt>Approach</dt><dd>Warm, calm & considered</dd></div></dl><a className="text-link" href="#contact">Tell me what you’re planning <span>↗</span></a></div>
-        <article className="team-card"><div className="team-portrait" aria-label="Nam Vu, lead photographer"><span className="team-portrait-placeholder" aria-hidden="true"><small>OLIVE LANE</small>NV<small>MELBOURNE</small></span></div><div className="team-copy"><span className="eyebrow">YOUR PHOTOGRAPHER</span><h3>Nam Vu</h3><p>WARM DIRECTION · HONEST MOMENTS</p></div></article>
+        <div><span className="eyebrow">MEET YOUR PHOTOGRAPHER</span><h2>A small studio,<br /><em>a personal touch.</em></h2><p>Nam leads every inquiry and session, from the first conversation through to your finished gallery. You’ll know who you’re speaking with and who will be behind the camera.</p><dl className="studio-facts"><div><dt>Based</dt><dd>Melbourne & Sydney</dd></div><div><dt>Available</dt><dd>Australia & selected overseas destinations</dd></div><div><dt>Approach</dt><dd>Warm, calm & considered</dd></div></dl><a className="text-link" href="#contact">Tell me what you’re planning <span>↗</span></a></div>
+        <article className="team-card"><div className="team-portrait" aria-label="Nam Vu, lead photographer"><span className="team-portrait-placeholder" aria-hidden="true"><small>OLIVE LANE</small>NV<small>MELBOURNE · SYDNEY</small></span></div><div className="team-copy"><span className="eyebrow">YOUR PHOTOGRAPHER</span><h3>Nam Vu</h3><p>WARM DIRECTION · HONEST MOMENTS</p></div></article>
       </section>
 
       <section className="experience section-wrap" id="experience">
@@ -298,7 +298,7 @@ function App() {
         {formState === 'sent' ? <div className="form-result" role="status" aria-live="polite"><strong>Your note has been received.</strong><p>The studio aims to reply by email within two business days. Your date isn’t reserved until you review and agree to the booking details.</p></div> : formState === 'error' ? <div className="form-result form-error" role="alert"><strong>Your note couldn’t be sent.</strong><p>Please check the required fields and try again. If it keeps failing, email <a href="mailto:hello@olivelane.photo?subject=Photography%20inquiry">customer care</a>.</p></div> : <p className="reply-note">Date and guest count are optional. The studio aims to reply within two business days.</p>}
       </form></section>
 
-      <footer className="footer"><a className="wordmark" href="#home">OLIVE LANE<span>PHOTOGRAPHY</span></a><span>MADE WITH CARE, IN MELBOURNE</span><div><a href="#contact">ENQUIRE</a><a href="#portfolio">PORTFOLIO</a><a href="#faq">FAQ</a><label className="appearance-setting"><span>APPEARANCE</span><select aria-label="Appearance" value={appearance} onChange={(event) => setAppearance(event.target.value as 'default' | 'night')}><option value="default">Light</option><option value="night">Night</option></select></label><span>© {new Date().getFullYear()} OLIVE LANE PHOTOGRAPHY · ALL RIGHTS RESERVED</span></div><p className="copyright-note">Original Olive Lane photographs and written content are protected by copyright. Do not copy, reproduce, or use them without written permission. Portfolio previews are illustrative stock images and are not represented as client work.</p></footer>
+      <footer className="footer"><a className="wordmark" href="#home">OLIVE LANE<span>PHOTOGRAPHY</span></a><span>MADE WITH CARE, IN MELBOURNE & SYDNEY</span><div><a href="#contact">ENQUIRE</a><a href="#portfolio">PORTFOLIO</a><a href="#faq">FAQ</a><label className="appearance-setting"><span>APPEARANCE</span><select aria-label="Appearance" value={appearance} onChange={(event) => setAppearance(event.target.value as 'default' | 'night')}><option value="default">Light</option><option value="night">Night</option></select></label><span>© {new Date().getFullYear()} OLIVE LANE PHOTOGRAPHY · ALL RIGHTS RESERVED</span></div><p className="copyright-note">Original Olive Lane photographs and written content are protected by copyright. Do not copy, reproduce, or use them without written permission. Portfolio previews are illustrative stock images and are not represented as client work.</p></footer>
       <section className={`studio-chat ${chatOpen ? 'is-open' : ''}`} aria-label="Olive Lane customer assistant">
         {chatOpen && <div className="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title"><div className="chat-header"><div className="chat-brand"><span className="chat-avatar" aria-hidden="true">OL</span><div><span className="eyebrow">OLIVE LANE · BOOKING STUDIO</span><h2 id="chat-title">A little help, anytime.</h2><span className="chat-presence"><i /> Your photography assistant</span></div></div><button type="button" className="chat-close" onClick={() => setChatOpen(false)} aria-label="Close chat">×</button></div><div className="chat-intro"><p>Ask about collections, destinations, pricing or what happens next. I can help you find a good place to start.</p></div><div className="chat-suggestions" aria-label="Suggested questions">{['Wedding collections', 'How does payment work?', 'What does it cost?'].map((prompt) => <button type="button" key={prompt} disabled={chatSending} onClick={() => { setChatInput(prompt); window.setTimeout(() => document.getElementById('chat-input')?.focus(), 0) }}>{prompt}</button>)}</div><div className="chat-messages" aria-live="polite" aria-relevant="additions">{chatMessages.map((item, index) => <p className={`chat-bubble ${item.role}`} key={`${index}-${item.role}`}>{item.text}{item.role === 'assistant' && item.sources && item.sources.length > 0 && <span className="chat-sources"><span>From Olive Lane</span>{item.sources.map((source) => <a key={`${source.href}-${source.label}`} href={source.href} onClick={() => setChatOpen(false)}>{source.label}</a>)}</span>}</p>)}{chatSending && <p className="chat-bubble assistant chat-thinking" role="status"><i /><i /><i /><span className="sr-only">Thinking</span></p>}</div><form className="chat-form" onSubmit={(event) => void sendChat(event)}><label className="sr-only" htmlFor="chat-input">Your question</label><textarea id="chat-input" value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder="Write your question…" maxLength={900} rows={2} /><button type="submit" aria-label="Send message" disabled={chatSending || chatInput.trim().length < 2}>↗</button></form><p className="chat-privacy">Please don’t share payment details or sensitive personal information. Chat replies may be generated with an external AI service.</p><a className="chat-inquiry-link" href="#contact" onClick={() => setChatOpen(false)}>Ready to enquire? <strong>Tell us about your plans ↗</strong></a></div>}
         <button className="chat-launcher" type="button" aria-expanded={chatOpen} aria-controls="chat-title" onClick={() => setChatOpen(!chatOpen)}><span className="chat-launcher-mark" aria-hidden="true">{chatOpen ? '×' : '✳'}</span>{chatOpen ? 'Close' : 'Ask a question'}</button>
