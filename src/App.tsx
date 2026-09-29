@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import './App.css'
 import { heroImage, photographs, type PortfolioPhoto } from './portfolio-data'
+import { studioFaqs, studioPackages, studioProfile, type StudioFaq, type StudioProfile } from './studio-knowledge'
 
 const galleryGroups = {
   Weddings: ['Weddings'],
@@ -31,14 +32,23 @@ const organizeStories = (items: PortfolioPhoto[], group: GalleryGroup) => {
 const serviceFromCategory = (value: string) => value === 'Weddings' ? 'Wedding' : ['Portraits', 'Studio', 'Outdoor'].includes(value) ? 'Portrait session' : value === 'Commercial' ? 'Commercial photography' : value === 'Street' ? 'Street photography' : value
 const storyType = (value: string) => value === 'Weddings' ? 'wedding' : ['Portraits', 'Studio', 'Outdoor'].includes(value) ? 'portrait' : value.toLowerCase()
 const API_URL = import.meta.env.VITE_API_URL || '/api'
-const defaultPackages = [
-  { id: 'intimate', name: 'The Intimate', category: 'Weddings', hours: '6 hours', deliverables: '350+ edited images', priceFrom: 2800, currency: 'AUD', description: 'For heartfelt celebrations.' },
-  { id: 'full-day', name: 'The Full Story', category: 'Weddings', hours: '10 hours', deliverables: '650+ edited images', priceFrom: 4200, currency: 'AUD', description: 'A whole day, from getting ready to the last dance.' },
-  { id: 'portrait', name: 'The Portrait Session', category: 'Portraits', hours: '90 minutes', deliverables: '60+ edited images', priceFrom: 650, currency: 'AUD', description: 'A relaxed portrait session.' },
-  { id: 'destination', name: 'The Faraway', category: 'Travel', hours: 'Custom', deliverables: 'Curated gallery', priceFrom: 1800, currency: 'AUD', description: 'Destination celebrations and travel stories.' },
-]
+const defaultPackages = studioPackages
+const placeChoices: Record<string, string[]> = {
+  Wedding: ['Royal Botanic Gardens', 'Fitzroy Gardens', 'Abbotsford Convent', 'Carlton Gardens', 'Melbourne Town Hall', 'Montsalvat', 'Rippon Lea Estate', 'Yarra Valley', 'Another venue'],
+  'Portrait session': ['Studio session', 'Royal Botanic Gardens', 'Brighton Beach', 'At home', 'Somewhere meaningful to me', 'Another place'],
+  Travel: ['Great Ocean Road', 'Grampians', 'Mornington Peninsula', 'Phillip Island', 'Somewhere else'],
+  'Commercial photography': ['Studio product setup', 'My workplace or brand space', 'Retail or lifestyle location', 'Somewhere else'],
+  'Street photography': ['Melbourne CBD', 'Laneways', 'Fitzroy or Collingwood', 'A custom photo walk'],
+}
+const focusChoices: Record<string, string[]> = {
+  Wedding: ['Getting ready', 'Ceremony', 'Couple portraits', 'Family and wedding party', 'Reception and speeches', 'Details and atmosphere'],
+  'Portrait session': ['Individual portraits', 'Couple portraits', 'Family portraits', 'Relaxed candid moments', 'A few gently guided portraits'],
+  Travel: ['Destination celebration', 'Couple or family portraits', 'Landscape and place', 'A travel story across several locations'],
+  'Commercial photography': ['Products', 'Team portraits', 'Workspace and interiors', 'Brand story or campaign'],
+  'Street photography': ['Street and city scenes', 'Environmental portraits', 'A short photo walk', 'A small visual story'],
+}
 type Inquiry = { id: number; name: string; email: string; eventType: string; eventDate: string; guestCount: number; budget: string; venue?: string; coverage?: string; priorities?: string; referralSource?: string; contactPreference?: string; message: string; status: string; adminNotes: string; createdAt: string; notificationStatus: 'pending' | 'sending' | 'sent' | 'failed' | 'not_recorded'; notificationAttempts: number; notificationLastAttemptAt: string; notificationResponseStatus: number | null; notificationResendId: string; notificationError: string }
-type ChatMessage = { role: 'assistant' | 'user'; text: string }
+type ChatMessage = { role: 'assistant' | 'user'; text: string; sources?: Array<{ label: string; href: string }> }
 
 function App() {
   const [appearance, setAppearance] = useState<'default' | 'night'>(() => {
@@ -53,6 +63,7 @@ function App() {
   const [stories, setStories] = useState(() => organizeStories(photographs, 'All'))
   const [visibleCount, setVisibleCount] = useState(6)
   const [packages, setPackages] = useState(defaultPackages)
+  const [studioContent, setStudioContent] = useState<{ profile: StudioProfile; faqs: StudioFaq[] }>({ profile: studioProfile, faqs: studioFaqs })
   const [adminMode, setAdminMode] = useState(window.location.hash === '#admin')
   const storyId = new URLSearchParams(window.location.search).get('story') || window.location.pathname.match(/^\/stories\/([a-z0-9-]+)\/?$/)?.[1] || null
   const [formState, setFormState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
@@ -87,6 +98,16 @@ function App() {
   }, [])
 
   useEffect(() => {
+    fetch(`${API_URL}/studio-knowledge`)
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data: { profile?: Partial<StudioProfile>; faqs?: StudioFaq[] }) => setStudioContent({
+        profile: { ...studioProfile, ...data.profile },
+        faqs: Array.isArray(data.faqs) ? data.faqs : studioFaqs,
+      }))
+      .catch(() => setStudioContent({ profile: studioProfile, faqs: studioFaqs }))
+  }, [])
+
+  useEffect(() => {
     const story = stories.find((item) => item.id === storyId)
     const title = story ? `${story.title} | Olive Lane Photography` : 'Olive Lane Photography | Melbourne Wedding, Portrait & Travel Photographer'
     const description = story ? `Explore an editorial ${story.category.toLowerCase()} image study from Olive Lane Photography.` : 'Melbourne photographer for weddings, portraits and travel stories. Explore image studies, collections and booking details.'
@@ -110,6 +131,13 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (!menuOpen) return
+    const closeMenu = (event: globalThis.KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false) }
+    window.addEventListener('keydown', closeMenu)
+    return () => window.removeEventListener('keydown', closeMenu)
+  }, [menuOpen])
+
+  useEffect(() => {
     const targetId = window.location.hash.slice(1)
     if (!targetId) return
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'instant' })))
@@ -121,13 +149,24 @@ function App() {
     const formElement = event.currentTarget
     const form = new FormData(formElement)
     const message = String(form.get('message') || '').trim()
-    const serviceNotes = String(form.get('serviceNotes') || '').trim()
-    const location = String(form.get('location') || '').trim()
-    const setting = String(form.get('setting') || '').trim()
+    const selectedPlaces = form.getAll('placePreferences').map(String)
+    const selectedFocus = form.getAll('focusPreferences').map(String)
+    const selectedAddOns = form.getAll('requestedAddOns').map(String)
+    const photographicApproach = String(form.get('photographicApproach') || '').trim()
     const editingStyle = String(form.get('editingStyle') || '').trim()
-    const videoHighlight = form.get('videoHighlight') === 'on'
     const collection = String(form.get('collection') || '').trim()
-    form.set('message', [message, setting && `Preferred setting: ${setting}`, editingStyle && `Editing style: ${editingStyle}`, videoHighlight && 'Interested in a short video highlight reel (please quote).', location && `Preferred location: ${location}`, serviceNotes && `Additional details: ${serviceNotes}`, collection && `Collection of interest: ${collection}`].filter(Boolean).join('\n\n') || 'No additional details provided.')
+    const previousPriorities = String(form.get('priorities') || '').trim()
+    form.delete('placePreferences')
+    form.delete('focusPreferences')
+    form.delete('requestedAddOns')
+    form.set('priorities', [
+      previousPriorities,
+      selectedPlaces.length > 0 && `Places to consider: ${selectedPlaces.join(', ')}`,
+      selectedFocus.length > 0 && `Photography priorities: ${selectedFocus.join(', ')}`,
+      selectedAddOns.length > 0 && `Options to discuss: ${selectedAddOns.join(', ')}`,
+      photographicApproach && `Photographic approach: ${photographicApproach}`,
+    ].filter(Boolean).join('\n'))
+    form.set('message', [message, editingStyle && `Editing style: ${editingStyle}`, collection && `Collection of interest: ${collection}`].filter(Boolean).join('\n\n') || 'No additional details provided.')
     try {
       const response = await fetch(`${API_URL}/inquiries`, {
         method: 'POST',
@@ -156,7 +195,7 @@ function App() {
       const response = await fetch(`${API_URL}/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, history }) })
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || 'Unable to answer right now')
-      setChatMessages((previous) => [...previous, { role: 'assistant', text: data.reply }])
+      setChatMessages((previous) => [...previous, { role: 'assistant', text: data.reply, sources: Array.isArray(data.sources) ? data.sources : [] }])
     } catch {
       setChatMessages((previous) => [...previous, { role: 'assistant', text: 'I couldn’t reach the chat service just now. Please email hello@olivelane.photo or use the inquiry form.' }])
     } finally { setChatSending(false) }
@@ -173,11 +212,12 @@ function App() {
 
   return (
     <main>
+      <a className="skip-link" href="#portfolio">Skip to portfolio</a>
       <header className="topbar">
         <a className="wordmark" href="#home" aria-label="Olive Lane home">OLIVE LANE<span>PHOTOGRAPHY</span></a>
-        <button className="menu-toggle" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? 'CLOSE' : 'MENU'}</button>
-        <nav className={menuOpen ? 'navigation is-open' : 'navigation'}>
-          <a href="#portfolio" onClick={() => setMenuOpen(false)}>Portfolio</a><a href="#about" onClick={() => setMenuOpen(false)}>About</a><a href="#packages" onClick={() => setMenuOpen(false)}>Pricing</a>
+        <button className="menu-toggle" aria-label="Toggle navigation" aria-controls="main-navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? 'CLOSE' : 'MENU'}</button>
+        <nav id="main-navigation" className={menuOpen ? 'navigation is-open' : 'navigation'} aria-label="Main navigation">
+          <a href="#portfolio" onClick={() => setMenuOpen(false)}>Portfolio</a><a href="#about" onClick={() => setMenuOpen(false)}>About</a><a href="#experience" onClick={() => setMenuOpen(false)}>Experience</a><a href="#packages" onClick={() => setMenuOpen(false)}>Pricing</a>
           <a className="nav-cta" href="#contact" onClick={() => setMenuOpen(false)}>Enquire <span>↗</span></a>
         </nav>
       </header>
@@ -189,6 +229,8 @@ function App() {
         <span className="hero-note">BASED IN MELBOURNE · AVAILABLE EVERYWHERE</span>
       </section>
 
+      <aside className="studio-promises" aria-label="Studio highlights"><span>Melbourne based</span><span>Available across Australia</span><span>Planning guidance included</span><span>Replies within two business days</span></aside>
+
       <section className="portfolio section-wrap" id="portfolio">
         <div className="section-heading"><div><span className="eyebrow">SELECTED WORK</span><h2>Stories worth <em>keeping.</em></h2></div><span className="image-count">A CURATED GLIMPSE INTO THE OLIVE LANE STYLE</span></div>
         <div className="filters" aria-label="Filter portfolio">{categories.map((category) => <button key={category} type="button" className={activeCategory === category ? 'filter active' : 'filter'} aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)}>{category}</button>)}<span className="filter-count" aria-live="polite">{stories.length} {stories.length === 1 ? 'image study' : 'image studies'}</span></div>
@@ -198,7 +240,7 @@ function App() {
       </section>
 
       <section className="team-profile section-wrap" id="about">
-        <div><span className="eyebrow">MEET YOUR PHOTOGRAPHER</span><h2>A small studio,<br /><em>a personal touch.</em></h2><p>Nam leads every inquiry and session, from the first conversation through to your finished gallery. You’ll know who you’re speaking with and who will be behind the camera.</p><a className="text-link" href="#contact">Tell me what you’re planning <span>↗</span></a></div>
+        <div><span className="eyebrow">MEET YOUR PHOTOGRAPHER</span><h2>A small studio,<br /><em>a personal touch.</em></h2><p>Nam leads every inquiry and session, from the first conversation through to your finished gallery. You’ll know who you’re speaking with and who will be behind the camera.</p><dl className="studio-facts"><div><dt>Based</dt><dd>Melbourne</dd></div><div><dt>Available</dt><dd>Australia & worldwide</dd></div><div><dt>Approach</dt><dd>Warm, calm & considered</dd></div></dl><a className="text-link" href="#contact">Tell me what you’re planning <span>↗</span></a></div>
         <article className="team-card"><div className="team-portrait" aria-label="Nam Vu, lead photographer"><span className="team-portrait-placeholder" aria-hidden="true"><small>OLIVE LANE</small>NV<small>MELBOURNE</small></span></div><div className="team-copy"><span className="eyebrow">YOUR PHOTOGRAPHER</span><h3>Nam Vu</h3><p>WARM DIRECTION · HONEST MOMENTS</p></div></article>
       </section>
 
@@ -213,42 +255,45 @@ function App() {
         <div className="included-note"><div><span className="eyebrow">IN EVERY COLLECTION</span><h3>The thoughtful details, taken care of.</h3></div><ul><li>A planning call and timeline guidance</li><li>Careful hand editing in a warm, natural style</li><li>A private online gallery for easy sharing</li><li>High-resolution files for personal printing</li></ul></div>
       </section>
 
-      <section className="packages section-wrap" id="packages"><div className="section-heading"><div><span className="eyebrow">PRICING & COVERAGE</span><h2>Thoughtfully <em>made.</em></h2></div><span className="image-count">EVERY COLLECTION INCLUDES A PRIVATE ONLINE GALLERY</span></div><div className="package-grid">{packages.map((item) => <article className="package-card" key={item.id}><span className="eyebrow">{item.category}</span><h3>{item.name}</h3><p>{item.description}</p><div className="package-details"><span>Coverage · {item.hours}</span><span>{item.deliverables}</span></div><strong>From ${item.priceFrom.toLocaleString()} {item.currency}</strong><a href={`/?collection=${encodeURIComponent(item.id)}#contact`} onClick={() => { setFormState('idle'); setSelectedPackage(item.id); setEventType(serviceFromCategory(item.category)) }}>Ask about this collection <span>↗</span></a></article>)}</div><p className="package-note">Starting prices are in AUD. The final quote depends on coverage, date, location and any travel. Send your preferred date through the inquiry form to check availability. Your written proposal will set out the deliverables, travel costs and payment terms before you decide. No payment is taken through this inquiry form.</p></section>
+      <section className="packages section-wrap" id="packages">
+        <div className="section-heading"><div><span className="eyebrow">PRICING & COVERAGE</span><h2>Thoughtfully <em>made.</em></h2></div><span className="image-count">COLLECTION DETAILS, PLACES & OPTIONS</span></div>
+        <div className="package-grid">{packages.map((item) => <article className="package-card" key={item.id}>
+          <span className="eyebrow">{item.category}</span><h3>{item.name}</h3><p>{item.description}</p>
+          <div className="package-details"><span>Coverage · {item.hours}</span><span>{item.deliverables}</span></div>
+          <div className="package-list-block"><h4>Included</h4><ul>{item.inclusions.map((inclusion) => <li key={inclusion}>{inclusion}</li>)}</ul></div>
+          <div className="package-list-block package-place-list"><h4>Places to consider</h4><ul>{item.locationIdeas.map((place) => <li key={place}>{place}</li>)}</ul></div>
+          <strong>From ${item.priceFrom.toLocaleString()} {item.currency}</strong>
+          <a href={`/?collection=${encodeURIComponent(item.id)}#contact`} onClick={() => { setFormState('idle'); setSelectedPackage(item.id); setEventType(serviceFromCategory(item.category)) }}>Personalise this collection <span>↗</span></a>
+        </article>)}</div>
+        <p className="package-note">Starting prices are in AUD. Places shown are ideas, not reserved or included venue bookings. Permits, venue access, travel and accommodation are confirmed and itemised in your proposal. Use the inquiry form to choose the moments, setting and additions you would like us to consider. No payment is taken with an inquiry.</p>
+      </section>
 
       <section className="faq section-wrap" id="faq"><div className="section-heading"><div><span className="eyebrow">GOOD TO KNOW</span><h2>A few little <em>answers.</em></h2></div><a className="text-link" href="#contact">Ask me anything <span>↗</span></a></div><div className="faq-list">
-        <details><summary>Is a deposit due when I send an inquiry?</summary><p>No. Sending an inquiry doesn’t reserve a date or charge you. If the date is available, your written proposal will explain the retainer, payment dates and what completes the booking before you choose to proceed.</p></details>
-        <details><summary>Are travel costs included in the starting price?</summary><p>Travel is not assumed to be included. Any travel or accommodation costs for your location will be itemised in the proposal before you book, so you can review the full amount first.</p></details>
-        <details><summary>When will we receive our photos?</summary><p>Your proposal will give the estimated gallery delivery window for your date and collection. We’ll agree that timing in writing before booking, and you’ll be contacted if anything needs to change.</p></details>
-        <details><summary>What if we need to reschedule or cancel?</summary><p>Please get in touch as soon as plans change. Availability for a new date, any fees, and how a retainer is handled depend on the written booking terms. Review those terms before confirming your date.</p></details>
-        <details><summary>Can we get prints or an album?</summary><p>Your collection includes high-resolution images for personal printing in a private online gallery. Albums and print options can be discussed and quoted separately when you choose your collection.</p></details>
-        <details><summary>What if you’re unavailable for our date?</summary><p>I’ll let you know before you make a booking. If helpful, you can ask whether I have a suitable photographer to recommend, though referrals depend on availability.</p></details>
-        <details><summary>Where are you based, and do you travel?</summary><p>I’m based in Melbourne and photograph weddings, portraits and travel stories across Australia and abroad. Send your location with your inquiry so travel needs can be included in the proposal.</p></details>
-        <details><summary>We’re camera shy. Is that okay?</summary><p>Absolutely. You don’t need to know how to pose. I’ll offer simple direction when it’s useful, then give you space to be together and let things unfold.</p></details>
-        <details><summary>Can we customise a collection?</summary><p>Yes. If your plans don’t fit neatly into one of the listed options, include a note about what you need and I’ll suggest a tailored approach.</p></details>
+        {studioContent.faqs.map((faq) => <details id={`faq-${faq.id}`} key={faq.id}><summary>{faq.question}</summary><p>{faq.answer}</p></details>)}
       </div></section>
 
-      <section className="contact" id="contact"><div><span className="eyebrow">NEW BOOKING INQUIRIES</span><h2>Something good<br />starts <em>here.</em></h2><p className="contact-intro">Tell me what you’re dreaming up. No payment is due with an inquiry. The studio aims to reply by email within two business days.</p><a className="text-link" href="#packages">View pricing & coverage <span>↑</span></a><p className="contact-email">Prefer email? <a href="mailto:hello@olivelane.photo">hello@olivelane.photo</a></p><p className="existing-booking-note">Already booked? <a href="mailto:hello@olivelane.photo?subject=Question%20about%20an%20existing%20booking">Email customer care about your booking</a>.</p></div><form className="contact-form" onSubmit={sendInquiry}>
+      <section className="contact" id="contact"><div><span className="eyebrow">NEW BOOKING INQUIRIES</span><h2>Something good<br />starts <em>here.</em></h2><p className="contact-intro">Tell me what you’re dreaming up. No payment is due with an inquiry. The studio aims to reply by email {studioContent.profile.responseWindow}.</p><div className="inquiry-assurances"><span>No payment</span><span>No obligation</span><span>Personal reply</span></div><a className="text-link" href="#packages">View pricing & coverage <span>↑</span></a><p className="contact-email">Prefer email? <a href={`mailto:${studioContent.profile.contactEmail}`}>{studioContent.profile.contactEmail}</a></p><p className="existing-booking-note">Already booked? <a href="mailto:hello@olivelane.photo?subject=Question%20about%20an%20existing%20booking">Email customer care about your booking</a>.</p></div><form className="contact-form" onSubmit={sendInquiry} aria-label="Photography booking inquiry">
         {selectedPackage && <input type="hidden" name="collection" value={packages.find((item) => item.id === selectedPackage)?.name || ''} />}
         {selectedPackage && <p className="selected-collection">You’re asking about <strong>{packages.find((item) => item.id === selectedPackage)?.name || 'a collection'}</strong>. <button type="button" onClick={() => setSelectedPackage('')}>Change</button></p>}
         <div className="form-row"><label>Your name <span className="field-hint">Required</span><input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Name" /></label><label>Email address <span className="field-hint">Required</span><input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></label></div>
         <div className="form-row"><label>What are you planning? <span className="field-hint">Required</span><select name="eventType" value={eventType} onChange={(event) => { setEventType(event.target.value); setSelectedPackage('') }} required aria-describedby="event-type-help"><option value="">Choose a session</option><option>Wedding</option><option>Portrait session</option><option>Travel</option><option>Commercial photography</option><option>Street photography</option><option>Something else</option></select><span className="sr-only" id="event-type-help">Choose the kind of photography you are interested in.</span></label><label>Date <span className="field-hint">Optional</span><input name="eventDate" type="date" aria-describedby="date-hint" /><span className="sr-only" id="date-hint">You can leave this blank if your date is not set.</span></label></div>
-        {eventType === 'Portrait session' && <div className="form-row"><label>Preferred setting <span className="field-hint">Optional</span><select name="setting"><option value="">Choose a setting</option><option>Studio</option><option>Outdoor</option><option>At home</option><option>Somewhere meaningful to me</option></select></label><label>Preferred location <span className="field-hint">Optional</span><input name="location" maxLength={140} placeholder="Neighbourhood, park, studio…" /></label></div>}
-        {eventType === 'Travel' && <label>Destination <span className="field-hint">Optional</span><input name="location" maxLength={140} placeholder="City, region or route" /></label>}
-        {(eventType === 'Something else' || !eventType) && <label>Location or venue <span className="field-hint">Optional</span><input name="location" maxLength={140} placeholder="Where would you like to meet?" /></label>}
-        <div className="booking-addons"><span className="eyebrow">PERSONALISE YOUR COLLECTION</span><div className="form-row"><label>Editing look <span className="field-hint">Optional</span><select name="editingStyle"><option value="">Choose a preference</option><option>Clean, modern digital</option><option>Warm, film-inspired</option><option>Let’s decide together</option></select></label><label className="addon-check"><input type="checkbox" name="videoHighlight" /><span><strong>Short video highlight</strong><small>Ask about a 30–60 second reel; quoted with your collection.</small></span></label></div></div>
-        <label>Venue or preferred location <span className="field-hint">Optional</span><input name="venue" maxLength={160} placeholder="Venue, city or setting" /></label>
+        {placeChoices[eventType] && <fieldset className="choice-fieldset"><legend>Places you’d like us to consider <span className="field-hint">Choose any</span></legend><p>These are location ideas. Venue access, permits, travel and any fees are confirmed in your proposal.</p><div className="choice-grid">{placeChoices[eventType].map((place) => <label className="choice-check" key={place}><input type="checkbox" name="placePreferences" value={place} /><span>{place}</span></label>)}</div><label className="custom-place">Another place or venue <span className="field-hint">Optional</span><input name="venue" maxLength={160} placeholder="Name a venue, neighbourhood or destination" /></label></fieldset>}
+        {focusChoices[eventType] && <fieldset className="choice-fieldset"><legend>What should the photographs focus on? <span className="field-hint">Choose any</span></legend><div className="choice-grid">{focusChoices[eventType].map((focus) => <label className="choice-check" key={focus}><input type="checkbox" name="focusPreferences" value={focus} /><span>{focus}</span></label>)}</div></fieldset>}
+        <div className="booking-addons"><span className="eyebrow">MAKE IT YOURS</span><div className="form-row"><label>Photographic approach <span className="field-hint">Optional</span><select name="photographicApproach"><option value="">Choose a preference</option><option>Candid and documentary</option><option>Gently guided</option><option>Editorial and composed</option><option>A mix of styles</option></select></label><label>Editing look <span className="field-hint">Optional</span><select name="editingStyle"><option value="">Choose a preference</option><option>Clean, modern digital</option><option>Warm, film-inspired</option><option>Let’s decide together</option></select></label></div><fieldset className="choice-fieldset addon-options"><legend>Options to discuss <span className="field-hint">Optional</span></legend><p>Choose anything you’d like included in the proposal. Availability and pricing will be confirmed with your quote.</p><div className="choice-grid">{['Album design and print options', 'Fine art prints', 'Short video highlight', 'Additional coverage time', 'Second photographer'].map((option) => <label className="choice-check" key={option}><input type="checkbox" name="requestedAddOns" value={option} /><span>{option}</span></label>)}</div></fieldset></div>
+        {!placeChoices[eventType] && <label>Venue, location or destination <span className="field-hint">Optional</span><input name="venue" maxLength={160} placeholder="Where would you like the photography to take place?" /></label>}
         <div className="form-row"><label>Coverage you have in mind <span className="field-hint">Optional</span><input name="coverage" maxLength={120} placeholder="A few hours, full day…" /></label>{eventType === 'Wedding' && <label>Approximate guest count <span className="field-hint">Optional</span><input name="guestCount" type="number" min="1" max="10000" inputMode="numeric" placeholder="About how many?" /></label>}</div>
         <div className="form-row"><label>Budget range <span className="field-hint">Optional</span><select name="budget"><option value="">Prefer to discuss</option><option>Under AUD $1,000</option><option>AUD $1,000–$2,500</option><option>AUD $2,500–$4,500</option><option>AUD $4,500–$7,500</option><option>AUD $7,500+</option><option>Not sure yet</option></select></label><label>How did you find Olive Lane? <span className="field-hint">Optional</span><select name="referralSource"><option value="">Choose if you like</option><option>Instagram</option><option>Google</option><option>Friend or family</option><option>Venue or vendor</option><option>Other</option></select></label></div>
         <label>What matters most to you? <span className="field-hint">Optional</span><textarea name="priorities" maxLength={1500} rows={3} placeholder="Moments, people, style, accessibility or other needs…" /></label>
         <label>Anything else? <span className="field-hint">Optional</span><textarea name="message" maxLength={3000} rows={3} placeholder="The place, the people, the feeling…" /></label>
+        <p className="inquiry-privacy-note">Your name, email, and plans are saved in the studio’s private inquiry system so the studio can follow up. The chat assistant does not read inquiry records. Please do not include payment details.</p>
         <button className="contact-button" type="submit" disabled={formState === 'sending'}>{formState === 'sending' ? 'Sending…' : 'Send your note'} <span aria-hidden="true">↗</span></button>
         {formState === 'sent' ? <div className="form-result" role="status" aria-live="polite"><strong>Your note has been received.</strong><p>You’ll hear back by email within two business days. Your date isn’t reserved until you review and agree to the booking details.</p></div> : formState === 'error' ? <div className="form-result form-error" role="alert"><strong>Your note couldn’t be sent.</strong><p>Please check the required fields and try again. If it keeps failing, email <a href="mailto:hello@olivelane.photo?subject=Photography%20inquiry">customer care</a>.</p></div> : <p className="reply-note">Date and guest count are optional. I’ll reply within two business days.</p>}
       </form></section>
 
-      <footer className="footer"><a className="wordmark" href="#home">OLIVE LANE<span>PHOTOGRAPHY</span></a><span>MADE WITH CARE, IN MELBOURNE</span><div><a href="#contact">ENQUIRE</a><a href="#portfolio">PORTFOLIO ↗</a><label className="appearance-setting"><span>APPEARANCE</span><select aria-label="Appearance" value={appearance} onChange={(event) => setAppearance(event.target.value as 'default' | 'night')}><option value="default">Light</option><option value="night">Night</option></select></label><span>© {new Date().getFullYear()} OLIVE LANE PHOTOGRAPHY · ALL RIGHTS RESERVED</span></div><p className="copyright-note">Original Olive Lane photographs and written content are protected by copyright. Do not copy, reproduce, or use them without written permission. Portfolio previews are illustrative stock images and are not represented as client work.</p></footer>
+      <footer className="footer"><a className="wordmark" href="#home">OLIVE LANE<span>PHOTOGRAPHY</span></a><span>MADE WITH CARE, IN MELBOURNE</span><div><a href="#contact">ENQUIRE</a><a href="#portfolio">PORTFOLIO</a><a href="#faq">FAQ</a><label className="appearance-setting"><span>APPEARANCE</span><select aria-label="Appearance" value={appearance} onChange={(event) => setAppearance(event.target.value as 'default' | 'night')}><option value="default">Light</option><option value="night">Night</option></select></label><span>© {new Date().getFullYear()} OLIVE LANE PHOTOGRAPHY · ALL RIGHTS RESERVED</span></div><p className="copyright-note">Original Olive Lane photographs and written content are protected by copyright. Do not copy, reproduce, or use them without written permission. Portfolio previews are illustrative stock images and are not represented as client work.</p></footer>
       <section className={`studio-chat ${chatOpen ? 'is-open' : ''}`} aria-label="Olive Lane customer assistant">
-        {chatOpen && <div className="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title"><div className="chat-header"><div className="chat-brand"><span className="chat-avatar" aria-hidden="true">OL</span><div><span className="eyebrow">OLIVE LANE · BOOKING STUDIO</span><h2 id="chat-title">A little help, anytime.</h2><span className="chat-presence"><i /> Your photography assistant</span></div></div><button type="button" className="chat-close" onClick={() => setChatOpen(false)} aria-label="Close chat">×</button></div><div className="chat-intro"><p>Ask about collections, destinations, pricing or what happens next. I can help you find a good place to start.</p></div><div className="chat-suggestions" aria-label="Suggested questions">{['Wedding collections', 'Travel destinations', 'What does it cost?'].map((prompt) => <button type="button" key={prompt} disabled={chatSending} onClick={() => { setChatInput(prompt); window.setTimeout(() => document.getElementById('chat-input')?.focus(), 0) }}>{prompt}</button>)}</div><div className="chat-messages" aria-live="polite" aria-relevant="additions">{chatMessages.map((item, index) => <p className={`chat-bubble ${item.role}`} key={`${index}-${item.role}`}>{item.text}</p>)}{chatSending && <p className="chat-bubble assistant chat-thinking" role="status"><i /><i /><i /><span className="sr-only">Thinking</span></p>}</div><form className="chat-form" onSubmit={(event) => void sendChat(event)}><label className="sr-only" htmlFor="chat-input">Your question</label><textarea id="chat-input" value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder="Write your question…" maxLength={900} rows={2} /><button type="submit" aria-label="Send message" disabled={chatSending || chatInput.trim().length < 2}>↗</button></form><p className="chat-privacy">Please don’t share payment details or private information.</p><a className="chat-inquiry-link" href="#contact" onClick={() => setChatOpen(false)}>Ready to enquire? <strong>Tell us about your plans ↗</strong></a></div>}
-        <button className="chat-launcher" type="button" aria-expanded={chatOpen} aria-controls="chat-title" onClick={() => setChatOpen(!chatOpen)}><span className="chat-launcher-mark" aria-hidden="true">{chatOpen ? '×' : '✳'}</span>{chatOpen ? 'Close' : 'Chat with Olive Lane'}</button>
+        {chatOpen && <div className="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title"><div className="chat-header"><div className="chat-brand"><span className="chat-avatar" aria-hidden="true">OL</span><div><span className="eyebrow">OLIVE LANE · BOOKING STUDIO</span><h2 id="chat-title">A little help, anytime.</h2><span className="chat-presence"><i /> Your photography assistant</span></div></div><button type="button" className="chat-close" onClick={() => setChatOpen(false)} aria-label="Close chat">×</button></div><div className="chat-intro"><p>Ask about collections, destinations, pricing or what happens next. I can help you find a good place to start.</p></div><div className="chat-suggestions" aria-label="Suggested questions">{['Wedding collections', 'How does payment work?', 'What does it cost?'].map((prompt) => <button type="button" key={prompt} disabled={chatSending} onClick={() => { setChatInput(prompt); window.setTimeout(() => document.getElementById('chat-input')?.focus(), 0) }}>{prompt}</button>)}</div><div className="chat-messages" aria-live="polite" aria-relevant="additions">{chatMessages.map((item, index) => <p className={`chat-bubble ${item.role}`} key={`${index}-${item.role}`}>{item.text}{item.role === 'assistant' && item.sources && item.sources.length > 0 && <span className="chat-sources"><span>From Olive Lane</span>{item.sources.map((source) => <a key={`${source.href}-${source.label}`} href={source.href} onClick={() => setChatOpen(false)}>{source.label}</a>)}</span>}</p>)}{chatSending && <p className="chat-bubble assistant chat-thinking" role="status"><i /><i /><i /><span className="sr-only">Thinking</span></p>}</div><form className="chat-form" onSubmit={(event) => void sendChat(event)}><label className="sr-only" htmlFor="chat-input">Your question</label><textarea id="chat-input" value={chatInput} onChange={(event) => setChatInput(event.target.value)} onKeyDown={handleChatKeyDown} placeholder="Write your question…" maxLength={900} rows={2} /><button type="submit" aria-label="Send message" disabled={chatSending || chatInput.trim().length < 2}>↗</button></form><p className="chat-privacy">Please don’t share payment details or sensitive personal information. Google may use free-tier AI chats to improve its products.</p><a className="chat-inquiry-link" href="#contact" onClick={() => setChatOpen(false)}>Ready to enquire? <strong>Tell us about your plans ↗</strong></a></div>}
+        <button className="chat-launcher" type="button" aria-expanded={chatOpen} aria-controls="chat-title" onClick={() => setChatOpen(!chatOpen)}><span className="chat-launcher-mark" aria-hidden="true">{chatOpen ? '×' : '✳'}</span>{chatOpen ? 'Close' : 'Ask a question'}</button>
       </section>
     </main>
   )

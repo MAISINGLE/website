@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS inquiries (
   contact_preference TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'new',
   admin_notes TEXT NOT NULL DEFAULT '',
+  notification_status TEXT NOT NULL DEFAULT 'not_recorded',
+  notification_attempts INTEGER NOT NULL DEFAULT 0,
+  notification_last_attempt_at TEXT NOT NULL DEFAULT '',
+  notification_response_status INTEGER,
+  notification_resend_id TEXT NOT NULL DEFAULT '',
+  notification_error TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL
 );
 
