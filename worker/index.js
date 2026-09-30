@@ -62,7 +62,7 @@ const studioAnswers = [
 const answerStudioQuestion = (message) => {
   const normalized = message.toLowerCase()
   const faqAnswer = getRelevantStudioFaqs(message, 1)[0]
-  if (faqAnswer && ['payment-methods', 'payment-timing', 'inquiry-privacy', 'response-time', 'booking-process', 'location-ideas', 'photographer-background', 'second-photographer', 'permits-and-fees', 'weather-plan', 'raw-files', 'image-usage', 'booking-contract', 'booking-lead-time', 'photographer-emergency'].includes(faqAnswer.id)) return faqAnswer.answer
+  if (faqAnswer && ['payment-methods', 'payment-timing', 'inquiry-privacy', 'response-time', 'booking-process', 'location-ideas', 'custom-work', 'photographer-background', 'second-photographer', 'permits-and-fees', 'weather-plan', 'raw-files', 'image-usage', 'booking-contract', 'booking-lead-time', 'photographer-emergency'].includes(faqAnswer.id)) return faqAnswer.answer
   const mentions = (...terms) => terms.some(term => normalized.includes(term))
   const askingPrice = mentions('price', 'cost', 'how much', 'pricing', 'budget')
   const portraitQuestion = mentions('portrait', 'family', 'couple', 'headshot')

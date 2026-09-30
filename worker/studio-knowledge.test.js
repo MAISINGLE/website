@@ -125,3 +125,16 @@ test('offline assistant answers common new questions without inventing studio po
     assert.match(data.reply, expectedAnswer)
   }
 })
+
+test('offline assistant answers album and add-on questions with project-specific pricing caveat', async () => {
+  const request = new Request('https://olive-lane.test/api/chat', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'What add-ons can I get, and how much do albums cost?' }),
+  })
+  const response = await worker.fetch(request, {})
+  const data = await response.json()
+  assert.equal(response.status, 200)
+  assert.equal(data.mode, 'faq')
+  assert.match(data.reply, /Video highlights, albums, and other additions/i)
+  assert.match(data.reply, /quoted for the project/i)
+})
